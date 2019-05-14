@@ -90,14 +90,15 @@ public:
 
 bool empty();//
 
-void testStack (OptStack* toTest, int volume)
+void testStack (OptStack* toTest, int volume, int threadNum)
 {
+	FastRandom* ran = new FastRandom (time(NULL) + threadNum);
 	for (int i = 0; i < volume; i++)
 	{
-		int pushOrPop = rand()%2;
+		int pushOrPop = ran->rand()%2;
 		if (pushOrPop)
 		{
-			toTest->push (rand()%volume);
+			toTest->push (ran->rand()%volume);
 		}
 		else
 		{
@@ -126,16 +127,18 @@ int main (int argc, char** argv)
 	
 	std::thread thr[maxThreads];
 	
+	FastRandom* ran = new FastRandom (__rdtsc ()/1000000000);
+	
 	for (int i = 0; i < INIT_PUSH; i++)
 	{
-		toTest.push (rand() % INIT_PUSH);
+		toTest.push (ran->rand() % INIT_PUSH);
 	}
 	
 	uint64_t tick = __rdtsc ()/100000;
 	
 	for (int i = 0; i < maxThreads; i++)
 	{
-		thr[i] = std::thread (testStack, &toTest, MAX_VOLUME/maxThreads);
+		thr[i] = std::thread (testStack, &toTest, MAX_VOLUME/maxThreads, i);
 	}
 	
 	for (int i = 0; i < maxThreads; i++)

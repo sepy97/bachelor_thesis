@@ -9,6 +9,21 @@
 #define MAX_THREAD_NUM 10
 #define MAX_VOLUME 10000000
 
+class FastRandom {
+private:
+	unsigned long long rnd;
+public:
+	FastRandom(unsigned long long seed) { //time + threadnum
+		rnd = seed;
+	}
+	unsigned long long rand() {
+		rnd ^= rnd << 21;
+		rnd ^= rnd >> 35;
+		rnd ^= rnd << 4;
+		return rnd;
+	}
+};
+
 class RTMStack {
 public:
 	RTMStack() :head(NULL) {}
@@ -73,14 +88,15 @@ private:
 	Node *head;
 };
 
-void testPush (RTMStack* toTest, int volume)
+void testPush (RTMStack* toTest, int volume, int threadNum)
 {
+	FastRandom* ran = new FastRandom (time(NULL) + threadNum);
 	for (int i = 0; i < volume; i++)
 	{
-		int pushOrPop = rand()%2;
+		int pushOrPop = ran->rand()%2;
 		if (pushOrPop)
 		{
-			toTest->push (rand()%volume);
+			toTest->push (ran->rand()%volume);
 		}
 		else
 		{
@@ -93,7 +109,6 @@ void testPush (RTMStack* toTest, int volume)
 int main (int argc, char** argv)
 {
 	RTMStack testStack;
-	srand (time (NULL));
 	
 	int maxThreads = 0;
 	
@@ -109,16 +124,18 @@ int main (int argc, char** argv)
 	
 	std::thread thr[maxThreads];
 	
+	FastRandom* ran = new FastRandom (__rdtsc ()/1000000000);
+	
 	for (int i = 0; i < INIT_PUSH; i++)
 	{
-		testStack.push (rand() % INIT_PUSH);
+		testStack.push (ran->rand() % INIT_PUSH);
 	}
 	
 	uint64_t tick = __rdtsc ()/100000;
 	
 	for (int i = 0; i < maxThreads; i++)
 	{
-		thr[i] = std::thread (testPush, &testStack, MAX_VOLUME/maxThreads);
+		thr[i] = std::thread (testPush, &testStack, MAX_VOLUME/maxThreads, i);
 	}
 	
 	for (int i = 0; i < maxThreads; i++)
