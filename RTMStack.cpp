@@ -33,10 +33,10 @@ public:
 		Node *pv = new Node;
 		pv->d = 0;
 		unsigned status = _xbegin ();
-		while (status != _XBEGIN_STARTED)
+		/*while (status != _XBEGIN_STARTED)
 		{
 			status = _xbegin ();
-		}
+		}*/
 		if (status == _XBEGIN_STARTED)
 		{
 			pv->d = d;
@@ -57,10 +57,10 @@ public:
 		int temp = -1;
 		Node *pv = NULL;
 		unsigned status = _xbegin ();
-		while (status != _XBEGIN_STARTED)
+		/*while (status != _XBEGIN_STARTED)
 		{
 			status = _xbegin ();
-		}
+		}*/
 		if (status == _XBEGIN_STARTED)
 		{
 			temp = head->d;
@@ -144,6 +144,6 @@ int main (int argc, char** argv)
 	}
 	
 	uint64_t tick2 = __rdtsc ()/100000;
-	printf ("%llu\n", tick2 - tick);
+	printf ("%d, %llu, \n", maxThreads, tick2 - tick);
 
 }
